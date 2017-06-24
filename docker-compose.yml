@@ -9,28 +9,28 @@ services:
     networks:
       - dbnet
 
-  mongosetup:
-    image: mongo:3.4.4
-    depends_on:
-      - mongo
-    volumes:
-      - ./scripts:/scripts
-    entrypoint: [ "/scripts/setup.sh" ]
-    networks:
-      - dbnet
-
   elasticsearch:
     image: elasticsearch:5.4
     ports:
       - "9200:9200"
     networks:
       - dbnet
-
-  connector:
-    image: yeasy/mongo-connector
+  
+  setup:
+    build: .
     depends_on:
-      - mongosetup
+      - mongo
       - elasticsearch
+    networks:
+      - dbnet
+      
+  connector:
+    image: python:3.6
+    depends_on:
+      - setup
+    volumes:
+      - ./scripts:/scripts
+    entrypoint: [ "/scripts/mongo-connector.sh" ]
     networks:
       - dbnet
 
